@@ -42,19 +42,3 @@ binding = "CRAWL_QUEUE"
 [[queues.producers]]
 queue = "index-queue"
 binding = "INDEX_QUEUE"
-
-
-[[queues.consumers]]
-queue = "sitemap-queue"
-max_batch_size = 10
-max_batch_timeout = 5
-
-[[queues.consumers]]
-queue = "crawl-queue"
-max_batch_size = 5
-max_batch_timeout = 10
-
-[[queues.consumers]]
-queue = "index-queue"
-max_batch_size = 20
-max_batch_timeout = 5
