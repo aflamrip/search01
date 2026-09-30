@@ -1,13 +1,13 @@
 import type { APIRoute } from 'astro';
-import { getDb } from '../../../lib/db/client';
+import { getDb, getCloudflareEnv } from '../../../lib/db/client';
 import { users } from '@schema';
 import { eq } from 'drizzle-orm';
 import { verifyPassword } from '../../../lib/auth/session';
 import { AuthLoginSchema } from '../../../lib/security/schemas';
 
-export const POST: APIRoute = async ({ request, locals, cookies }) => {
+export const POST: APIRoute = async (context) => {
   try {
-    const body = await request.json();
+    const body = await context.request.json();
     const validation = AuthLoginSchema.safeParse(body);
 
     if (!validation.success) {
@@ -19,7 +19,8 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
 
     const { email, password } = validation.data;
     const cleanEmail = email.toLowerCase().trim();
-    const db = getDb(locals.runtime.env.DB);
+    const cfEnv = getCloudflareEnv(context);
+    const db = getDb(cfEnv.DB);
 
     const userRows = await db.select().from(users).where(eq(users.email, cleanEmail));
     if (userRows.length === 0) {
@@ -34,7 +35,7 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
     }
 
     // Set secure HTTP-only session cookie
-    cookies.set('webmaster_session', user.id, {
+    context.cookies.set('webmaster_session', user.id, {
       path: '/',
       httpOnly: true,
       secure: true,

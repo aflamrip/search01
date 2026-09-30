@@ -1,13 +1,13 @@
 import type { APIRoute } from 'astro';
-import { getDb } from '../../../lib/db/client';
+import { getDb, getCloudflareEnv } from '../../../lib/db/client';
 import { users } from '@schema';
 import { eq } from 'drizzle-orm';
 import { hashPassword } from '../../../lib/auth/session';
 import { AuthSignupSchema } from '../../../lib/security/schemas';
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async (context) => {
   try {
-    const body = await request.json();
+    const body = await context.request.json();
     const validation = AuthSignupSchema.safeParse(body);
 
     if (!validation.success) {
@@ -19,7 +19,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const { name, email, password } = validation.data;
     const cleanEmail = email.toLowerCase().trim();
-    const db = getDb(locals.runtime.env.DB);
+    const cfEnv = getCloudflareEnv(context);
+    const db = getDb(cfEnv.DB);
 
     const existingUser = await db.select().from(users).where(eq(users.email, cleanEmail));
     if (existingUser.length > 0) {
