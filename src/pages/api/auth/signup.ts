@@ -3,19 +3,21 @@ import { getDb } from '../../../lib/db/client';
 import { users } from '@schema';
 import { eq } from 'drizzle-orm';
 import { hashPassword } from '../../../lib/auth/session';
+import { AuthSignupSchema } from '../../../lib/security/schemas';
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const { name, email, password } = await request.json();
+    const body = await request.json();
+    const validation = AuthSignupSchema.safeParse(body);
 
-    if (!name || !email || !password) {
-      return new Response(JSON.stringify({ error: 'جميع الحقول مطلوبة' }), { status: 400 });
+    if (!validation.success) {
+      return new Response(
+        JSON.stringify({ error: validation.error.errors[0]?.message || 'بيانات إنشاء الحساب غير صالحة' }),
+        { status: 400 }
+      );
     }
 
-    if (password.length < 6) {
-      return new Response(JSON.stringify({ error: 'كلمة المرور يجب أن لا تقل عن 6 أحرف' }), { status: 400 });
-    }
-
+    const { name, email, password } = validation.data;
     const cleanEmail = email.toLowerCase().trim();
     const db = getDb(locals.runtime.env.DB);
 

@@ -3,15 +3,21 @@ import { getDb } from '../../../lib/db/client';
 import { users } from '@schema';
 import { eq } from 'drizzle-orm';
 import { verifyPassword } from '../../../lib/auth/session';
+import { AuthLoginSchema } from '../../../lib/security/schemas';
 
 export const POST: APIRoute = async ({ request, locals, cookies }) => {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    const validation = AuthLoginSchema.safeParse(body);
 
-    if (!email || !password) {
-      return new Response(JSON.stringify({ error: 'البريد الإلكتروني وكلمة المرور مطلوبان' }), { status: 400 });
+    if (!validation.success) {
+      return new Response(
+        JSON.stringify({ error: validation.error.errors[0]?.message || 'البريد الإلكتروني وكلمة المرور مطلوبان' }),
+        { status: 400 }
+      );
     }
 
+    const { email, password } = validation.data;
     const cleanEmail = email.toLowerCase().trim();
     const db = getDb(locals.runtime.env.DB);
 
