@@ -20,10 +20,9 @@ export const POST: APIRoute = async (context) => {
     const { name, email, password } = validation.data;
     const cleanEmail = email.toLowerCase().trim();
 
-    // Safe environment resolution for Astro 7 + Cloudflare adapter v14
     let envBindings: any = null;
     try {
-      // @ts-ignore - cloudflare:workers module available in Cloudflare Workers environment
+      // @ts-ignore - cloudflare:workers module in Cloudflare Workers
       const cfWorkers = await import('cloudflare:workers');
       envBindings = cfWorkers.env;
     } catch {
@@ -36,8 +35,25 @@ export const POST: APIRoute = async (context) => {
 
     const db = getDb(envBindings.DB);
 
-    // Check if email already exists
-    const existingUser = await db.select().from(users).where(eq(users.email, cleanEmail));
+    // Try executing users query with friendly fallback for unmigrated D1 database
+    let existingUser: any[] = [];
+    let allUsers: any[] = [];
+
+    try {
+      existingUser = await db.select().from(users).where(eq(users.email, cleanEmail));
+      allUsers = await db.select({ id: users.id }).from(users);
+    } catch (dbError: any) {
+      if (dbError.message?.includes('no such table') || dbError.message?.includes('users')) {
+        return new Response(
+          JSON.stringify({
+            error: 'جدول المستخدمين غير موجود في D1 بعد. يرجى تطبيق أمر D1 Migrations: npx wrangler d1 execute my-app --remote --file=./drizzle/migrations/0000_swift_sersi.sql',
+          }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      throw dbError;
+    }
+
     if (existingUser.length > 0) {
       return new Response(JSON.stringify({ error: 'البريد الإلكتروني مسجل بالفعل' }), {
         status: 400,
@@ -46,11 +62,11 @@ export const POST: APIRoute = async (context) => {
     }
 
     // First user created is automatically assigned 'super_admin', subsequent users become 'webmaster'
-    const allUsers = await db.select({ id: users.id }).from(users);
     const assignedRole = allUsers.length === 0 ? 'super_admin' : 'webmaster';
 
     const passwordHash = await hashPassword(password);
     const userId = crypto.randomUUID();
+    const now = new Date();
 
     await db.insert(users).values({
       id: userId,
@@ -59,11 +75,11 @@ export const POST: APIRoute = async (context) => {
       passwordHash,
       role: assignedRole,
       status: 'active',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
     });
 
-    const roleMessage = assignedRole === 'super_admin' 
+    const roleMessage = assignedRole === 'super_admin'
       ? 'تم إنشاء الحساب الأول بنجاح ورتبتك هي (مدير النظام الرئيسي — Super Admin).'
       : 'تم إنشاء حساب مشرف الموقع بنجاح. يمكنك الآن تسجيل الدخول.';
 
