@@ -1,0 +1,16 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "jsxImportSource": "svelte",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@schema": ["schema/index.ts"]
+    },
+    "types": ["@cloudflare/workers-types"]
+  }
+}

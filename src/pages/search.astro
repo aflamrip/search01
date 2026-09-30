@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SearchBox from '../components/molecules/SearchBox.svelte';
+import { generateSnippet } from '../lib/search/snippets';
+
+const query = Astro.url.searchParams.get('q') || '';
+const type = Astro.url.searchParams.get('type') || 'web';
+
+// Sample results for presentation
+const sampleResults = [
+  {
+    id: '1',
+    url: 'https://astro.build',
+    title: 'Astro — الإطار البرمجي الحديث لبناء مواقع فائقة السرعة',
+    description: 'Astro هو إطار عمل لبناء مواقع الويب الموجهة للمحتوى. يدعم Svelte و React و Vue مع دعم ميزتي SSR و SSG.',
+    text: 'Astro يتيح لك جلب المكونات التفاعلية فقط عند الحاجة باستخدام فكرة الجزيرة التفاعلية Client Islands. يدعم Astro 7 التكامل التام مع Cloudflare Workers.',
+    publishedAt: new Date(),
+  },
+  {
+    id: '2',
+    url: 'https://svelte.dev',
+    title: 'Svelte 5 — التحديث الجديد بنظام الـ Runes',
+    description: 'تعرف على نظام Runes في Svelte 5 وكيف يحسن إدارة الحالة وحفظ الأداء في التطبيقات مع $state و $derived و $props.',
+    text: 'Svelte 5 يوفر أداءً استثنائياً بدون الحاجة لـ Virtual DOM. أحدثت ثورة Runes سهولة كبيرة في كتابة المنطق البرمجي مع $state و $derived.',
+    publishedAt: new Date(),
+  }
+];
+
+const filteredResults = query
+  ? sampleResults.filter(
+      (r) =>
+        r.title.toLowerCase().includes(query.toLowerCase()) ||
+        r.description.toLowerCase().includes(query.toLowerCase()) ||
+        r.text.toLowerCase().includes(query.toLowerCase())
+    )
+  : [];
+---
+
+<BaseLayout title={`بحث: ${query} — محرك البحث`}>
+  <div class="min-h-screen flex flex-col">
+    <!-- Search Header -->
+    <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4">
+      <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center gap-4">
+        <a href="/" class="font-bold text-xl text-blue-600 dark:text-blue-400 shrink-0">SearchEngine</a>
+        <div class="w-full max-w-2xl">
+          <SearchBox client:load initialQuery={query} />
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="max-w-6xl mx-auto mt-4 flex gap-6 text-sm font-medium border-t border-slate-100 dark:border-slate-800/50 pt-3">
+        <a href={`/search?q=${encodeURIComponent(query)}&type=web`} class={`pb-2 border-b-2 ${type === 'web' ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-semibold' : 'border-transparent text-slate-500'}`}>الكل</a>
+        <a href={`/search?q=${encodeURIComponent(query)}&type=news`} class={`pb-2 border-b-2 ${type === 'news' ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-semibold' : 'border-transparent text-slate-500'}`}>الأخبار</a>
+        <a href={`/search?q=${encodeURIComponent(query)}&type=images`} class={`pb-2 border-b-2 ${type === 'images' ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-semibold' : 'border-transparent text-slate-500'}`}>الصور</a>
+        <a href={`/search?q=${encodeURIComponent(query)}&type=videos`} class={`pb-2 border-b-2 ${type === 'videos' ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-semibold' : 'border-transparent text-slate-500'}`}>الفيديوهات</a>
+      </div>
+    </header>
+
+    <!-- Results Content -->
+    <main class="flex-1 max-w-4xl mx-auto w-full px-6 py-6">
+      <div class="text-xs text-slate-500 dark:text-slate-400 mb-6">
+        تم العثور على {filteredResults.length} نتيجة خلال 0.04 ثانية
+      </div>
+
+      {filteredResults.length > 0 ? (
+        <div class="space-y-6">
+          {filteredResults.map((item) => {
+            const snippetHtml = generateSnippet(item.text, query);
+            return (
+              <article class="group">
+                <div class="text-xs text-slate-500 dark:text-slate-400 truncate mb-1" dir="ltr">
+                  {item.url}
+                </div>
+                <h2 class="text-xl font-medium text-blue-700 dark:text-blue-400 group-hover:underline mb-1">
+                  <a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a>
+                </h2>
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed" set:html={snippetHtml} />
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8">
+          <svg class="w-12 h-12 mx-auto text-slate-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">لم نتمكن من العثور على نتائج لـ "{query}"</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+            تأكد من كتابة الكلمات بشكل صحيح، أو جرب استخدام كلمات مفتاحية أكثر عمومية.
+          </p>
+        </div>
+      )}
+    </main>
+  </div>
+</BaseLayout>

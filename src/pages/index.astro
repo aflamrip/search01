@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SearchBox from '../components/molecules/SearchBox.svelte';
+---
+
+<BaseLayout title="محرك البحث — الصفحة الرئيسية">
+  <div class="min-h-screen flex flex-col justify-between p-6">
+    <header class="flex justify-between items-center max-w-6xl mx-auto w-full">
+      <div class="flex items-center space-x-4 space-x-reverse">
+        <span class="font-bold text-lg text-blue-600 dark:text-blue-400">SearchEngine V4</span>
+      </div>
+      <nav class="flex items-center space-x-6 space-x-reverse text-sm font-medium">
+        <a href="/dashboard" class="text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400">لوحة المشرفين (Webmaster)</a>
+        <a href="/about" class="text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400">حول المحرك</a>
+      </nav>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center max-w-3xl mx-auto w-full px-4 -mt-16 text-center">
+      <div class="mb-8">
+        <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-3">
+          ابحث في الويب بكل ثقة
+        </h1>
+        <p class="text-slate-500 dark:text-slate-400 text-lg">
+          محرك بحث فائق السرعة يعتمد على الفهرسة الذكية والتصفح المستقل
+        </p>
+      </div>
+
+      <SearchBox client:load />
+
+      <div class="mt-8 flex flex-wrap justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+        <span>شائع الآن:</span>
+        <a href="/search?q=الذكاء+الاصطناعي" class="bg-slate-200/60 dark:bg-slate-800 hover:bg-blue-100 px-3 py-1 rounded-full">الذكاء الاصطناعي</a>
+        <a href="/search?q=تكنولوجيا+السحاب" class="bg-slate-200/60 dark:bg-slate-800 hover:bg-blue-100 px-3 py-1 rounded-full">تكنولوجيا السحاب</a>
+        <a href="/search?q=Cloudflare+Workers" class="bg-slate-200/60 dark:bg-slate-800 hover:bg-blue-100 px-3 py-1 rounded-full">Cloudflare Workers</a>
+      </div>
+    </main>
+
+    <footer class="max-w-6xl mx-auto w-full border-t border-slate-200 dark:border-slate-800 pt-4 flex flex-col sm:flex-row justify-between text-xs text-slate-500 dark:text-slate-400">
+      <p>© 2026 محرك البحث V4 منصة مفتوحة ومستقلة.</p>
+      <div class="flex space-x-4 space-x-reverse mt-2 sm:mt-0">
+        <a href="/privacy" class="hover:underline">الخصوصية</a>
+        <a href="/terms" class="hover:underline">الشروط</a>
+        <a href="/documentation" class="hover:underline">التعليمات البرمجية</a>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>

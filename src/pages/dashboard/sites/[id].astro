@@ -1,0 +1,113 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const { id } = Astro.params;
+
+// Mock site data for presentation
+const site = {
+  id: id || '1',
+  name: 'Astro Official Site',
+  domain: 'astro.build',
+  status: 'active',
+  verificationStatus: 'verified',
+  lastCrawledAt: 'قبل ساعتين',
+  sitemapsCount: 2,
+  pagesIndexed: 14250,
+  pendingPages: 820,
+  errorsCount: 12,
+};
+---
+
+<BaseLayout title={`إدارة ${site.domain} — Webmaster Console`}>
+  <div class="min-h-screen flex flex-col bg-slate-100 dark:bg-slate-950">
+    <!-- Console Header -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4">
+      <div class="max-w-6xl mx-auto flex justify-between items-center">
+        <div class="flex items-center space-x-3 space-x-reverse">
+          <a href="/dashboard" class="text-sm font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">← الرجوع للقائمة</a>
+          <span class="text-slate-300 dark:text-slate-700">|</span>
+          <span class="font-bold text-lg text-slate-900 dark:text-white">{site.domain}</span>
+        </div>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300">
+          موقع موثق
+        </span>
+      </div>
+    </header>
+
+    <main class="flex-1 max-w-6xl mx-auto w-full px-6 py-8">
+      <!-- Site Overview Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+          <div class="text-xs text-slate-500 mb-1">إجمالي الصفحات المفهرسة</div>
+          <div class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{site.pagesIndexed.toLocaleString('ar-EG')}</div>
+          <div class="text-xs text-slate-400 mt-2">تحديث منذ: {site.lastCrawledAt}</div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+          <div class="text-xs text-slate-500 mb-1">خرائط الـ Sitemap المسجلة</div>
+          <div class="text-3xl font-extrabold text-slate-900 dark:text-white">{site.sitemapsCount}</div>
+          <div class="text-xs text-blue-600 dark:text-blue-400 mt-2">خريطة نشطة</div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+          <div class="text-xs text-slate-500 mb-1">أخطاء الفهرسة والاستثناءات</div>
+          <div class="text-3xl font-extrabold text-rose-600 dark:text-rose-400">{site.errorsCount}</div>
+          <div class="text-xs text-slate-400 mt-2">تتطلب المراجعة</div>
+        </div>
+      </div>
+
+      <!-- Add Sitemap Form -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl mb-8">
+        <h2 class="text-base font-bold text-slate-900 dark:text-white mb-2">إرسال خريطة موقع جديدة (Sitemap XML)</h2>
+        <p class="text-xs text-slate-500 mb-4">أدخل رابط ملف XML الخاص بالموقع للبدء بفهرسة الصفحات في الخلفية عبر Cloudflare Queues</p>
+
+        <form action="/api/sitemaps/submit" method="POST" class="flex flex-col sm:flex-row gap-3">
+          <input type="hidden" name="siteId" value={site.id} />
+          <input
+            type="url"
+            name="sitemapUrl"
+            required
+            placeholder="https://astro.build/sitemap-index.xml"
+            dir="ltr"
+            class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 py-2 rounded-lg transition-all shadow-sm"
+          >
+            إرسال الخريطة
+          </button>
+        </form>
+      </div>
+
+      <!-- Sitemaps List -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 font-semibold text-sm">
+          خرائط Sitemap المسجلة
+        </div>
+        <table class="w-full text-sm text-right">
+          <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs">
+            <tr>
+              <th class="px-6 py-3">رابط الخريطة</th>
+              <th class="px-6 py-3">الحالة</th>
+              <th class="px-6 py-3">الروابط المكتشفة</th>
+              <th class="px-6 py-3">آخر قراءة</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+            <tr>
+              <td class="px-6 py-4 font-mono text-xs text-blue-600 dark:text-blue-400" dir="ltr text-right">
+                https://astro.build/sitemap-index.xml
+              </td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300">
+                  مكتملة
+                </span>
+              </td>
+              <td class="px-6 py-4">12,400</td>
+              <td class="px-6 py-4 text-slate-500">قبل ساعة</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</BaseLayout>

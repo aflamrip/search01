@@ -1,0 +1,30 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  dir?: 'rtl' | 'ltr';
+  lang?: string;
+}
+
+const {
+  title = 'محرك البحث العربي — Search Engine Platform',
+  description = 'محرك بحث متطور وسريع مبني بتقنيات Astro 7 و Svelte 5 و Cloudflare Workers',
+  dir = 'rtl',
+  lang = 'ar',
+} = Astro.props;
+---
+
+<!catch-all>
+<html lang={lang} dir={dir} class="h-full scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+  </head>
+  <body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased font-sans">
+    <slot />
+  </body>
+</html>

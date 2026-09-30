@@ -1,0 +1,47 @@
+name = "search-engine-platform"
+main = "./.astro/dist/entry.mjs"
+compatibility_date = "2024-09-25"
+compatibility_flags = ["nodejs_compat"]
+
+[site]
+bucket = "./dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "search_engine_db"
+database_id = "local-search-engine-db"
+
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "local-cache-kv"
+
+[[r2_buckets]]
+binding = "STORAGE_R2"
+bucket_name = "search-engine-assets"
+
+[[queues.producers]]
+queue = "sitemap-queue"
+binding = "SITEMAP_QUEUE"
+
+[[queues.producers]]
+queue = "crawl-queue"
+binding = "CRAWL_QUEUE"
+
+[[queues.producers]]
+queue = "index-queue"
+binding = "INDEX_QUEUE"
+
+[[queues.consumers]]
+queue = "sitemap-queue"
+max_batch_size = 10
+max_batch_timeout = 5
+
+[[queues.consumers]]
+queue = "crawl-queue"
+max_batch_size = 5
+max_batch_timeout = 10
+
+[[queues.consumers]]
+queue = "index-queue"
+max_batch_size = 20
+max_batch_timeout = 5
