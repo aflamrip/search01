@@ -13,28 +13,46 @@ export const POST: APIRoute = async (context) => {
     if (!validation.success) {
       return new Response(
         JSON.stringify({ error: validation.error.errors[0]?.message || 'البريد الإلكتروني وكلمة المرور مطلوبان' }),
-        { status: 400 }
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     const { email, password } = validation.data;
     const cleanEmail = email.toLowerCase().trim();
-    const cfEnv = getCloudflareEnv(context);
-    const db = getDb(cfEnv.DB);
+
+    let envBindings: any = null;
+    try {
+      // @ts-ignore - cloudflare:workers module in Cloudflare Workers
+      const cfWorkers = await import('cloudflare:workers');
+      envBindings = cfWorkers.env;
+    } catch {
+      envBindings = getCloudflareEnv(context);
+    }
+
+    if (!envBindings || !envBindings.DB) {
+      envBindings = getCloudflareEnv(context);
+    }
+
+    const db = getDb(envBindings.DB);
 
     const userRows = await db.select().from(users).where(eq(users.email, cleanEmail));
     if (userRows.length === 0) {
-      return new Response(JSON.stringify({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' }), { status: 401 });
+      return new Response(JSON.stringify({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     const user = userRows[0];
     const isValid = await verifyPassword(password, user.passwordHash);
 
     if (!isValid) {
-      return new Response(JSON.stringify({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' }), { status: 401 });
+      return new Response(JSON.stringify({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // Set secure HTTP-only session cookie
     context.cookies.set('webmaster_session', user.id, {
       path: '/',
       httpOnly: true,
@@ -48,9 +66,12 @@ export const POST: APIRoute = async (context) => {
         success: true,
         user: { id: user.id, name: user.name, email: user.email, role: user.role },
       }),
-      { status: 200 }
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message || 'حدث خطأ أثناء تسجيل الدخول' }), { status: 500 });
+    return new Response(JSON.stringify({ error: error.message || 'حدث خطأ أثناء تسجيل الدخول' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 };

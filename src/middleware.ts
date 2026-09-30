@@ -20,8 +20,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   if (sessionUserId) {
     try {
-      const cfEnv = getCloudflareEnv(context);
-      const db = getDb(cfEnv.DB);
+      let envBindings: any = null;
+      try {
+        // @ts-ignore
+        const cfWorkers = await import('cloudflare:workers');
+        envBindings = cfWorkers.env;
+      } catch {
+        envBindings = getCloudflareEnv(context);
+      }
+
+      if (!envBindings || !envBindings.DB) {
+        envBindings = getCloudflareEnv(context);
+      }
+
+      const db = getDb(envBindings.DB);
       const userRows = await db.select().from(users).where(eq(users.id, sessionUserId));
       if (userRows.length > 0) {
         isAuthenticated = true;
@@ -33,7 +45,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
-  // Redirect unauthenticated users from protected routes
+  // Redirect unauthenticated users away from protected routes
   if (isProtected && !isAuthenticated) {
     return context.redirect('/login?redirect=' + encodeURIComponent(pathname));
   }
