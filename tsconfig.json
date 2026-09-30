@@ -4,13 +4,14 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
     "jsx": "preserve",
     "jsxImportSource": "svelte",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "@schema": ["schema/index.ts"]
-    },
-    "types": ["@cloudflare/workers-types"]
-  }
+    }
+  },
+  "include": ["src", "schema", "scripts"]
 }

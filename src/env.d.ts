@@ -1,10 +1,13 @@
 /// <reference types="astro/client" />
-/// <reference types="@cloudflare/workers-types" />
+
+// Cloudflare Workers type declarations for Astro 7 + @astrojs/cloudflare v14
+// The adapter auto-augments App.Locals with `runtime` via its own d.ts
+// We only extend it here with our custom bindings.
 
 type D1Database = import('@cloudflare/workers-types').D1Database;
 type KVNamespace = import('@cloudflare/workers-types').KVNamespace;
 type R2Bucket = import('@cloudflare/workers-types').R2Bucket;
-type Queue = import('@cloudflare/workers-types').Queue;
+type Queue<Body = unknown> = import('@cloudflare/workers-types').Queue<Body>;
 
 declare namespace App {
   interface Locals {

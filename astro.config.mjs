@@ -6,7 +6,6 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare({
-    imageService: 'cloudflare',
     platformProxy: {
       enabled: true,
     },
@@ -14,5 +13,14 @@ export default defineConfig({
   integrations: [svelte()],
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      external: [
+        'node:async_hooks',
+        'node:crypto',
+        'node:path',
+        'node:url',
+        'node:fs/promises',
+      ],
+    },
   },
 });
