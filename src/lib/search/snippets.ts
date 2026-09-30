@@ -1,5 +1,7 @@
+import sanitizeHtml from 'sanitize-html';
+
 export function generateSnippet(text: string, query: string, maxLength: number = 160): string {
-  if (!text || !query) return text ? text.slice(0, maxLength) + '...' : '';
+  if (!text || !query) return sanitizeSnippet(text ? text.slice(0, maxLength) + '...' : '');
 
   const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
   const lowerText = text.toLowerCase();
@@ -14,7 +16,7 @@ export function generateSnippet(text: string, query: string, maxLength: number =
   }
 
   if (bestIndex === -1) {
-    return text.slice(0, maxLength) + (text.length > maxLength ? '...' : '');
+    return sanitizeSnippet(text.slice(0, maxLength) + (text.length > maxLength ? '...' : ''));
   }
 
   const start = Math.max(0, bestIndex - Math.floor(maxLength / 3));
@@ -28,7 +30,16 @@ export function generateSnippet(text: string, query: string, maxLength: number =
     snippet = snippet.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-900/50 text-slate-900 dark:text-slate-100 font-semibold px-0.5 rounded">$1</mark>');
   }
 
-  return snippet;
+  return sanitizeSnippet(snippet);
+}
+
+function sanitizeSnippet(rawHtml: string): string {
+  return sanitizeHtml(rawHtml, {
+    allowedTags: ['mark'],
+    allowedAttributes: {
+      mark: ['class'],
+    },
+  });
 }
 
 function escapeRegExp(string: string): string {

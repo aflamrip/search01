@@ -9,12 +9,14 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.3",
     "@astrojs/svelte": "^9.0.1",
+    "@mozilla/readability": "^0.5.0",
     "@tanstack/svelte-query": "^6.3.0",
     "@tanstack/svelte-table": "^9.2.4",
     "@tanstack/svelte-virtual": "^3.13.0",
@@ -22,14 +24,20 @@
     "drizzle-orm": "^0.45.3",
     "drizzle-zod": "^0.8.3",
     "fast-xml-parser": "^5.11.2",
+    "parse5": "^7.2.1",
+    "robots-parser": "^3.0.1",
+    "sanitize-html": "^2.14.0",
     "svelte": "^5.57.1",
+    "tldts": "^6.1.71",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
+    "@types/sanitize-html": "^2.13.0",
     "drizzle-kit": "^0.31.11",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.9.3",
+    "vitest": "^3.0.7",
     "wrangler": "^4.145.0"
   }
 }
