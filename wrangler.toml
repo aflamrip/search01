@@ -1,20 +1,44 @@
 name = "search-engine-platform"
-compatibility_date = "2026-09-30"
+compatibility_date = "2024-09-25"
 compatibility_flags = ["nodejs_compat"]
 
+# ─────────────────────────────────────────────
+# D1 Database
+# Run: npx wrangler d1 create search_engine_db
+# Then replace <D1_DATABASE_ID> below with the returned ID
+# ─────────────────────────────────────────────
 [[d1_databases]]
 binding = "DB"
-database_name = "search_engine_db"
-database_id = "local-search-engine-db"
+database_name = "my-app"
+database_id = "9e38be37-4638-431b-812a-5a2d389f4247"
 
+# ─────────────────────────────────────────────
+# KV Namespaces
+# Run: npx wrangler kv namespace create CACHE_KV
+# Then replace <CACHE_KV_ID> below with the returned ID
+# For preview (local dev), run: npx wrangler kv namespace create CACHE_KV --preview
+# Then replace <CACHE_KV_PREVIEW_ID> below
+# ─────────────────────────────────────────────
 [[kv_namespaces]]
-binding = "CACHE_KV"
-id = "local-cache-kv"
+binding = "serach01"
+id = "a8ae66000e3347ea9999ebb1f9736d21"
+preview_id = "<CACHE_KV_PREVIEW_ID>"
 
+# ─────────────────────────────────────────────
+# R2 Bucket
+# Run: npx wrangler r2 bucket create search-engine-assets
+# No ID needed — just the bucket name
+# ─────────────────────────────────────────────
 [[r2_buckets]]
 binding = "STORAGE_R2"
 bucket_name = "search-engine-assets"
 
+# ─────────────────────────────────────────────
+# Queues (Producers)
+# Run: npx wrangler queues create sitemap-queue
+# Run: npx wrangler queues create crawl-queue
+# Run: npx wrangler queues create index-queue
+# ─────────────────────────────────────────────
 [[queues.producers]]
 queue = "sitemap-queue"
 binding = "SITEMAP_QUEUE"
@@ -27,6 +51,9 @@ binding = "CRAWL_QUEUE"
 queue = "index-queue"
 binding = "INDEX_QUEUE"
 
+# ─────────────────────────────────────────────
+# Queues (Consumers)
+# ─────────────────────────────────────────────
 [[queues.consumers]]
 queue = "sitemap-queue"
 max_batch_size = 10
